@@ -1,5 +1,5 @@
 #!/bin/bash
-python3 ./twitter_app.py -p 15 -k "hashtag trending switter" -m 50 -s 1 &
+python3 ./twitter_app.py -p 15 -k "bitcoin gaming Android climate cricket corona" -m 50 -s 1 &
 
 python3 ./app.py &
 python -m webbrowser http://localhost:5001

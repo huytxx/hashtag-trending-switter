@@ -9,8 +9,7 @@ import requests
 
 
 def auth() -> str:
-    # function to get Bearer token from file name 'keys.txt'
-
+    # lấy token từ file keys
     with open('keys.txt', 'r') as key_file:
         lines = key_file.read().split('\n')
         for x in lines:
@@ -22,7 +21,7 @@ def auth() -> str:
 def create_url(keyword, end_date, next_token=None, max_results=10):
     search_url = "https://api.twitter.com/2/tweets/search/recent"
 
-    # change params based on the endpoint you are using
+    # filter các thông tin theo param bên dưới
     query_params = {'query': keyword,
                     'end_time': end_date,
                     'max_results': max_results,
@@ -52,8 +51,7 @@ def get_tweet_data(next_token=None, query='corona', max_results=20):
     url: tuple = create_url(keyword, end_time, next_token=next_token, max_results=20)
     json_response = get_response(url=url[0], headers=headers, params=url[1])
 
-    # for testing only
-    # print(json.dumps(json_response, indent=4))
+    # lấy một số data ra file test
     import json
     with open('test.txt', 'w+') as teeee:
         json.dump(json_response, teeee, indent=2)
@@ -71,12 +69,12 @@ def get_tag(tag_info: dict):
 def send_tweets_to_spark(http_resp, tcp_connection):
     data: list = http_resp["data"]
 
-    # tweet is a dict
+    #
     for tweet in data:
         try:
             hashtag_list = tweet['entities']['hashtags']
             for tag_info in hashtag_list:
-                # sending only hashtag
+                # gửi data hashtag
                 hashtag = get_tag(tag_info)
                 tcp_connection.send(hashtag.encode("utf-8"))
         except KeyError:
@@ -115,17 +113,17 @@ if __name__ == '__main__':
     queries = str(queries).split(" ")
     
 
-    # TCP_IP = "127.0.0.1"
-    # TCP_PORT = 9009
+    TCP_IP = "127.0.0.1"
+    TCP_PORT = 9009
 
-    # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    # s.bind((TCP_IP, TCP_PORT))
-    # s.listen(1)
-    # print("Waiting for the TCP connection...")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind((TCP_IP, TCP_PORT))
+    s.listen(1)
+    print("Waiting for the TCP connection...")
 
-    # conn, addr = s.accept()
-    # print("Connected successfully... Starting getting tweets.")
+    conn, addr = s.accept()
+    print("Connected successfully... Starting getting tweets.")
 
     next_token = None
 
@@ -136,7 +134,7 @@ if __name__ == '__main__':
                 print(f"\n\n\t\tProcessing Page {_} for keyword {query}\n\n")
                 resp = get_tweet_data(next_token=next_token, query=query, max_results=max_results)
                 next_token = resp['meta']['next_token']
-                #send_tweets_to_spark(http_resp=resp, tcp_connection=conn)
+                send_tweets_to_spark(http_resp=resp, tcp_connection=conn)
                 time.sleep(sleep_timer)
             except KeyboardInterrupt:
                 exit("Keyboard Interrupt, Exiting..")

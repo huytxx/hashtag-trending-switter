@@ -18,8 +18,8 @@ tags = {}
 
 
 def get_top_players(data, n=20):
-    """Get top n players by score.
-    Returns a dictionary or an `OrderedDict` if `order` is true.
+    """lấy top 20
+    trả ra OrderedDict
     """
     top = sorted(data.items(), key=lambda x: x[1], reverse=True)[:n]
     return OrderedDict(top)
@@ -33,8 +33,6 @@ def home():
 @app.route('/refreshData')
 def refresh_data():
     global dataValues, categoryValues
-    # print("labels now: " + str(dataValues))
-    # print("data now: " + str(categoryValues))
     return jsonify(dataValues=dataValues, categoryValues=categoryValues)
 
 
@@ -42,7 +40,6 @@ def refresh_data():
 def update_data():
     global tags, dataValues, categoryValues
 
-    # ast.literal_eval is used to convert str to dict
     data = ast.literal_eval(request.data.decode("utf-8"))
 
     tags[data['hashtag']] = data['count']
@@ -53,9 +50,7 @@ def update_data():
     categoryValues = [x for x in sorted_tags]
     dataValues = [tags[x] for x in sorted_tags]
 
-    # print(f"labels received: {str(categoryValues)}")
-    # print(f"data received: {str(dataValues)}")
-    return "success", 201
+    return "success", 200
 
 
 if __name__ == "__main__":
